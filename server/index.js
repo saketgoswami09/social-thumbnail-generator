@@ -1,13 +1,21 @@
-const express = require("express");
+require('dotenv').config();
+const connectDB = require('./src/config/db'); // Import the connectDB function
+const app = require('./src/app');
 
-const app = express();
+const PORT = process.env.PORT || 3001;
 
-const PORT = 3001;
+const startServer = async () => {
+  try {
+    // Connect to the database first
+    await connectDB();
+    
+    // Then start the Express server
+    app.listen(PORT, () => {
+      console.log(`Server is listening on http://localhost:${PORT}`);
+    });
+  } catch (error) {
+    console.error("Failed to start server", error);
+  }
+};
 
-app.get('/api/health', (req, res) => {
-  res.json({ message: 'Server is running!' }); // Send JSON for better API practice
-});
-
-app.listen(PORT, () => {
-  console.log(`server is running at http://localhost:${PORT}`);
-});
+startServer();
