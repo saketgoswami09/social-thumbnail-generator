@@ -1,7 +1,8 @@
 const bcrypt = require("bcryptjs");
-const { z, email } = require("zod");
+const { z } = require("zod");
 const User = require("../models/user.model");
 const jwt = require("jsonwebtoken");
+const Project = require("../models/project.model");
 
 // Define a schema for validating the registration input
 const registerSchema = z.object({
@@ -10,6 +11,7 @@ const registerSchema = z.object({
     .string()
     .min(8, { message: "Password must be at least 8 characters long" }),
 });
+
 
 const register = async (req, res) => {
   try {
@@ -86,7 +88,6 @@ const login = async (req, res) => {
       expiresIn: "1h",
     });
 
-
     // If everything is correct, we'll issue a token in the next step.
     // For now, send a success response.
     res.status(200).json({ token });
@@ -103,14 +104,18 @@ const getMe = async (req, res) => {
   } catch (err) {
     console.error(err.message);
     res.status(500).send("Server Error");
-  
   }
 };
+
+
 
 module.exports = {
   register,
   login,
   getMe,
-}
+};
 
-console.log('--- FROM CONTROLLER --- Keys being exported:', Object.keys(module.exports));
+console.log(
+  "--- FROM CONTROLLER --- Keys being exported:",
+  Object.keys(module.exports)
+);
