@@ -1,44 +1,53 @@
-const express = require("express");
-const helmet = require("helmet");
-const cors = require("cors");
-const morgan = require("morgan");
-const rateLimit = require("express-rate-limit");
-const authRoutes = require("./routes/auth.routes"); // Import the new router
-const projectRoutes = require("./routes/project.routes");
+// file: backend/src/app.js
+
+import express from "express";
+import helmet from "helmet";
+import cors from "cors";
+import morgan from "morgan";
+import rateLimit from "express-rate-limit";
+
+// --- Route Imports ---
+import authRoutes from "./routes/authRoutes.js";
+import projectRoutes from "./routes/projectRoutes.js"; // Renamed from projectRoutes.js based on your import path
+import generationRoutes from './routes/generationRoutes.js';
+
+// --- Middleware Imports ---
+import { protect } from './middleware/authMiddleware.js';
+import { notFound, errorHandler } from './middleware/errorMiddleware.js';
+
 const app = express();
 
-// --- Middleware ---
+// --- Core Middleware ---
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 100,
-  standaedHeaders: true,
-  leagacyHeaders: false,
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // limit each IP to 100 requests per windowMs
+  standardHeaders: true,
+  legacyHeaders: false,
 });
 
 app.use(limiter);
-
-// Set security-related HTTP response headers
 app.use(helmet());
+app.use(cors()); // Configure CORS options properly for production later
 
-// Enable Cross-Origin Resource Sharing
-app.use(cors());
+// Log HTTP requests during development
+if (process.env.NODE_ENV === 'development') {
+    app.use(morgan("dev"));
+}
 
-// Log HTTP requests to the console
-app.use(morgan("dev"));
+app.use(express.json()); // Parse incoming JSON requests
 
-// Parse incoming JSON requests
-app.use(express.json());
-
-// --- Routes ---
+// --- API Routes ---
 app.get("/api/health", (req, res) => {
   res.json({ message: "Server is running!" });
 });
-// All routes starting with /api/auth will be handled by this router
+
 app.use("/api/auth", authRoutes);
+app.use("/api/projects", protect, projectRoutes); // Protect all project routes
+app.use('/api/generate', protect, generationRoutes); // Protect all generation routes
 
-app.use("/api/projects", projectRoutes);
+// --- Error Handling Middleware ---
+// Re-enable our standard notFound and errorHandler from Module 1/2
+app.use(notFound);
+app.use(errorHandler);
 
-app.use((req, res, next) => {
-  res.status(404).json({ error: "Not Found" });
-});
-module.exports = app;
+export default app;

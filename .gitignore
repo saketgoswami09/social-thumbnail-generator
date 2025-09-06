@@ -24,3 +24,8 @@ yarn-error.log*
 .DS_Store
 .idea/
 .vscode/
+
+node_modules/
+.env
+service-account-key.json # Old or example name, can keep or remove
+thumbnail-generator-backend-532d5e778118.json # Add this line

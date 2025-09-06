@@ -1,5 +1,5 @@
-const request = require("supertest");
-const app = require("../app"); // Import our Express app
+import request from "supertest";
+import app from "../app.js"; // Import our Express app
 
 // This is a test suite, a collection of related tests
 describe("GET /api/health", () => {
